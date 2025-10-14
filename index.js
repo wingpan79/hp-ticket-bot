@@ -3,12 +3,12 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const URL = 'https://tickets.wbstudiotour.co.uk/webstore/shop/viewitems.aspx?c=tix2&cg=hptst2';
-const CHECK_INTERVAL_MINUTES = 5; // 幾耐查一次（可改）
-const MONTH_WANTED = 10; // 想查嘅月份（11 = 十一月）
-const DATES_WANTED = [24]; // 想要嘅日子
-const ADULT_TICKETS_WANTED = 1;
-const minHour=0;
-const maxHour=14;
+const CHECK_INTERVAL_MINUTES = process.env.CHECK_INTERVAL_MINUTES; 
+const MONTH_WANTED = process.env.MONTH_WANTED;
+const DATES_WANTED = process.env.DATES_WANTED;
+const ADULT_TICKETS_WANTED = process.env.ADULT_TICKETS_WANTED;
+const MIN_HOUR=process.env.MIN_HOUR;
+const MAX_HOUR=process.env.MAX_HOUR;
 async function sendEmailNotification(availableDates) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
