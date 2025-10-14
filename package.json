@@ -1,0 +1,12 @@
+{
+  "name": "hp-ticket-bot",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "puppeteer": "^22.0.0",
+    "nodemailer": "^6.9.8",
+    "dotenv": "^16.4.0"
+  }
+}
