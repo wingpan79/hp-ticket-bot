@@ -3,11 +3,12 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const URL = 'https://tickets.wbstudiotour.co.uk/webstore/shop/viewitems.aspx?c=tix2&cg=hptst2';
-const CHECK_INTERVAL_MINUTES = 10; // 幾耐查一次（可改）
+const CHECK_INTERVAL_MINUTES = 5; // 幾耐查一次（可改）
 const MONTH_WANTED = 10; // 想查嘅月份（11 = 十一月）
 const DATES_WANTED = [24]; // 想要嘅日子
 const ADULT_TICKETS_WANTED = 1;
-
+const minHour=0;
+const maxHour=14;
 async function sendEmailNotification(availableDates) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -80,11 +81,28 @@ async function waitForAvailability(page, monthWanted) {
 async function addTicketsToBasket(page, dayElement) {
   await dayElement.click();
   await new Promise(resolve => setTimeout(resolve, 2000));
-  const timeButtons = await page.$$('.time-selector .times .time.row .select-time:not(.disabled)');
-  if (timeButtons.length === 0) return false;
+  const timeRows = await page.$$('.time-selector .times .time.row');
+  if (timeRows.length === 0) return false;
+  for (let i = 0; i < timeRows.length; i++) {
+	  const row = timeRows[i];
+	  const timeString = await row.$eval('.time', el => el.innerText.trim());
+	  console.log(`Found available time slot ${timeString}`);
+	  
+	  const hour = parseInt(timeString.split(':')[0], 10);
+		if (minHour != null && hour < minHour) {
+			console.log(`Tickets found at wanted date but time is too early (${timeString})`);
+			return false;
+		}
+		if (maxHour != null && hour > maxHour) {
+			console.log(`Tickets found at wanted date but time is too late (${timeString})`);
+			return false;
+		}
 
-  console.log('🕐 Found available time slot, adding to basket...');
-  await timeButtons[0].click();
+		console.log('Found tickets!!!!!');
+		return true;
+  }
+
+  
   await new Promise(resolve => setTimeout(resolve, 2000));
   const cartButton = await page.$('.typcn.typcn-shopping-cart.ng-binding');
   if (cartButton) await cartButton.click();
@@ -93,6 +111,7 @@ async function addTicketsToBasket(page, dayElement) {
 
 async function checkForTickets(page) {
   await setAdultTickets(page, ADULT_TICKETS_WANTED);
+  let tickets = false;
   const extendSessionBtn = await page.$('.ui-control.button.extendSession');
   if (extendSessionBtn) {
     console.log('Extending session...');
@@ -112,11 +131,11 @@ async function checkForTickets(page) {
     if (DATES_WANTED.includes(day)) {
       console.log(`🎟️ Tickets available on ${day}`);
       availableDates.push(day);
-      //await addTicketsToBasket(page, el);
+      tickets = await addTicketsToBasket(page, el);
     }
   }
 
-  if (availableDates.length > 0) {
+  if (tickets) {
     await sendEmailNotification(availableDates);
     return true;
   }
