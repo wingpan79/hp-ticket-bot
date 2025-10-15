@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const URL = 'https://tickets.wbstudiotour.co.uk/webstore/shop/viewitems.aspx?c=tix2&cg=hptst2';
 const CHECK_INTERVAL_MINUTES = process.env.CHECK_INTERVAL_MINUTES; 
-const MONTH_WANTED = process.env.MONTH_WANTED;
+const MONTH_WANTED = process.env.MONTH_WANTED; 
 const DATES_WANTED = process.env.DATES_WANTED;
 const ADULT_TICKETS_WANTED = process.env.ADULT_TICKETS_WANTED;
 const MIN_HOUR=process.env.MIN_HOUR;
@@ -89,11 +89,11 @@ async function addTicketsToBasket(page, dayElement) {
 	  console.log(`Found available time slot ${timeString}`);
 	  
 	  const hour = parseInt(timeString.split(':')[0], 10);
-		if (minHour != null && hour < minHour) {
+		if (MIN_HOUR != null && hour < MIN_HOUR) {
 			console.log(`Tickets found at wanted date but time is too early (${timeString})`);
 			return false;
 		}
-		if (maxHour != null && hour > maxHour) {
+		if (MAX_HOUR != null && hour > MAX_HOUR) {
 			console.log(`Tickets found at wanted date but time is too late (${timeString})`);
 			return false;
 		}
@@ -121,15 +121,15 @@ async function checkForTickets(page) {
   await new Promise(resolve => setTimeout(resolve, 1000));
   await page.click('.shared-calendar-button');
   await new Promise(resolve => setTimeout(resolve, 2000));
+  console.log(`📅 Checking month ${MONTH_WANTED} ...`);
   const { availableEls, month } = await waitForAvailability(page, MONTH_WANTED);
   
-  console.log(`📅 Checking month ${month} ...`);
-
+  console.log(`📅 Checking date ${DATES_WANTED} ...`);
   const availableDates = [];
   for (const el of availableEls) {
     const day = await page.evaluate(el => parseInt(el.innerText, 10), el);
+	console.log(`🎟️ Tickets available on ${day}`);
     if (DATES_WANTED.includes(day)) {
-      console.log(`🎟️ Tickets available on ${day}`);
       availableDates.push(day);
       tickets = await addTicketsToBasket(page, el);
     }
