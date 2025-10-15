@@ -9,6 +9,8 @@ const DATES_WANTED = process.env.DATES_WANTED;
 const ADULT_TICKETS_WANTED = process.env.ADULT_TICKETS_WANTED;
 const MIN_HOUR=process.env.MIN_HOUR;
 const MAX_HOUR=process.env.MAX_HOUR;
+console.log("Loaded env:", process.env);
+
 async function sendEmailNotification(availableDates) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -164,3 +166,4 @@ async function startBot() {
 }
 
 startBot();
+
