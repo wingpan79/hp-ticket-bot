@@ -161,9 +161,12 @@ async function startBot() {
   if (!success) {
     console.log(`⏳ Will check again in ${CHECK_INTERVAL_MINUTES} minutes...\n`);
     setTimeout(startBot, CHECK_INTERVAL_MINUTES * 60 * 1000);
+  }else{
+	  process.exit(0);
   }
 }
 
 startBot();
+
 
 
