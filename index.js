@@ -1,5 +1,7 @@
+const sgMail = require('@sendgrid/mail');
 const puppeteer = require('puppeteer');
-const nodemailer = require('nodemailer');
+//const nodemailer = require('nodemailer');
+
 require('dotenv').config();
 
 const URL = 'https://tickets.wbstudiotour.co.uk/webstore/shop/viewitems.aspx?c=tix2&cg=hptst2';
@@ -11,24 +13,18 @@ const MIN_HOUR=process.env.MIN_HOUR;
 const MAX_HOUR=process.env.MAX_HOUR;
 
 async function sendEmailNotification(availableDates) {
- const transporter = nodemailer.createTransport({
-  host: "smtp.sendgrid.net",
-  port: 587,
-  auth: {
-    user: "apikey",
-    pass: process.env.SENDGRID_API_KEY
+	sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+try {
+    await sgMail.send({
+      to: process.env.EMAIL_TO,
+      from: { email: process.env.EMAIL_FROM, name: "Hogwarts Ticket Bot" },
+       subject: '🎟️ Warner Bros Studio Tour Tickets Available!',
+		text: `Tickets available on: ${availableDates.join(', ')}\n\nLink: ${URL}`
+    });
+    console.log("✅ Email sent successfully!");
+  } catch (error) {
+    console.error("❌ Error sending email:", error.response?.body || error);
   }
-});
-
-  await transporter.sendMail({
-    from: `"HP Ticket Bot" <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_TO,
-    subject: '🎟️ Warner Bros Studio Tour Tickets Available!',
-    text: `Tickets available on: ${availableDates.join(', ')}\n\nLink: ${URL}`
-  });
-
-	console.log('✅ Email sent successfully!');
-
   
 }
 
