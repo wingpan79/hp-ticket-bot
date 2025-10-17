@@ -5,19 +5,20 @@ require('dotenv').config();
 const URL = 'https://tickets.wbstudiotour.co.uk/webstore/shop/viewitems.aspx?c=tix2&cg=hptst2';
 const CHECK_INTERVAL_MINUTES = process.env.CHECK_INTERVAL_MINUTES; 
 const MONTH_WANTED = process.env.MONTH_WANTED; 
-const DATES_WANTED = process.env.DATES_WANTED;
+const DATES_WANTED = process.env.DATES_WANTED; 
 const ADULT_TICKETS_WANTED = process.env.ADULT_TICKETS_WANTED;
 const MIN_HOUR=process.env.MIN_HOUR;
 const MAX_HOUR=process.env.MAX_HOUR;
 
 async function sendEmailNotification(availableDates) {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
+ const transporter = nodemailer.createTransport({
+  host: "smtp.sendgrid.net",
+  port: 587,
+  auth: {
+    user: "apikey",
+    pass: process.env.SENDGRID_API_KEY
+  }
+});
 
   await transporter.sendMail({
     from: `"HP Ticket Bot" <${process.env.EMAIL_USER}>`,
@@ -26,7 +27,9 @@ async function sendEmailNotification(availableDates) {
     text: `Tickets available on: ${availableDates.join(', ')}\n\nLink: ${URL}`
   });
 
-  console.log('📧 Email sent!');
+	console.log('✅ Email sent successfully!');
+
+  
 }
 
 async function setAdultTickets(page, adultTicketsWanted) {
@@ -167,6 +170,3 @@ async function startBot() {
 }
 
 startBot();
-
-
-
